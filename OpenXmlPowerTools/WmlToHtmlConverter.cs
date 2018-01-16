@@ -1876,8 +1876,13 @@ namespace OpenXmlPowerTools
             // for all content parts, not just the main document part.
 
             // w:defaultTabStop in settings
-            var sxd = wordDoc.MainDocumentPart.DocumentSettingsPart.GetXDocument();
-            var defaultTabStop = (int?)sxd.Descendants(W.defaultTabStop).Attributes(W.val).FirstOrDefault() ?? 720;
+            var defaultTabStop = 720;
+            var part = wordDoc.MainDocumentPart.DocumentSettingsPart;
+            if (part != null)
+            {
+                var sxd = part.GetXDocument();
+                defaultTabStop = (int?)sxd.Descendants(W.defaultTabStop).Attributes(W.val).FirstOrDefault() ?? defaultTabStop;
+            }
 
             var pxd = wordDoc.MainDocumentPart.GetXDocument();
             var root = pxd.Root;
