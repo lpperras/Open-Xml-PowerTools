@@ -37,6 +37,8 @@ using Xunit;
 using Word = Microsoft.Office.Interop.Word;
 #endif
 
+#if !ELIDE_XUNIT_TESTS
+
 namespace OxPt
 {
     public class HcTests
@@ -101,16 +103,20 @@ namespace OxPt
         [InlineData("HC050-Shaded-Text-01.docx")]
         [InlineData("HC051-Shaded-Text-02.docx")]
         [InlineData("HC060-Image-with-Hyperlink.docx")]
+        [InlineData("HC061-Hyperlink-in-Field.docx")]
+        
         public void HC001(string name)
         {
             FileInfo sourceDocx = new FileInfo(Path.Combine(TestUtil.SourceDir.FullName, name));
 
 #if COPY_FILES_FOR_DEBUGGING
             var sourceCopiedToDestDocx = new FileInfo(Path.Combine(TestUtil.TempDir.FullName, sourceDocx.Name.Replace(".docx", "-1-Source.docx")));
-            File.Copy(sourceDocx.FullName, sourceCopiedToDestDocx.FullName);
+            if (!sourceCopiedToDestDocx.Exists)
+                File.Copy(sourceDocx.FullName, sourceCopiedToDestDocx.FullName);
 
             var assembledFormattingDestDocx = new FileInfo(Path.Combine(TestUtil.TempDir.FullName, sourceDocx.Name.Replace(".docx", "-2-FormattingAssembled.docx")));
-            CopyFormattingAssembledDocx(sourceDocx, assembledFormattingDestDocx);
+            if (!assembledFormattingDestDocx.Exists)
+                CopyFormattingAssembledDocx(sourceDocx, assembledFormattingDestDocx);
 #endif
 
             var oxPtConvertedDestHtml = new FileInfo(Path.Combine(TestUtil.TempDir.FullName, sourceDocx.Name.Replace(".docx", "-3-OxPt.html")));
@@ -390,3 +396,5 @@ namespace OxPt
 #endif
     }
 }
+
+#endif
