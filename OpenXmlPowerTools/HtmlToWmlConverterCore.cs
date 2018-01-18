@@ -2406,7 +2406,7 @@ namespace OpenXmlPowerTools.HtmlToWml
 
             string pictureDescription = "Picture " + pictureId.ToString();
 
-            string floatValue = element.GetProp("float").ToString();
+            string floatValue = element.GetProp("float")?.ToString();
             if (floatValue == "none")
             {
                 XElement run = new XElement(W.r,
@@ -2459,16 +2459,16 @@ namespace OpenXmlPowerTools.HtmlToWml
             Emu marginLeftInEmus = 0;
             Emu marginRightInEmus = 0;
 
-            if (marginTopProp.IsNotAuto)
+            if (marginTopProp != null && marginTopProp.IsNotAuto)
                 marginTopInEmus = (Emu)marginTopProp;
 
-            if (marginBottomProp.IsNotAuto)
+            if (marginBottomProp != null && marginBottomProp.IsNotAuto)
                 marginBottomInEmus = (Emu)marginBottomProp;
 
-            if (marginLeftProp.IsNotAuto)
+            if (marginLeftProp != null && marginLeftProp.IsNotAuto)
                 marginLeftInEmus = (Emu)marginLeftProp;
 
-            if (marginRightProp.IsNotAuto)
+            if (marginRightProp != null && marginRightProp.IsNotAuto)
                 marginRightInEmus = (Emu)marginRightProp;
 
             Emu relativeFromColumn = 0;
@@ -2476,7 +2476,7 @@ namespace OpenXmlPowerTools.HtmlToWml
             {
                 relativeFromColumn = marginLeftInEmus;
                 CssExpression parentMarginLeft = element.Parent.GetProp("margin-left");
-                if (parentMarginLeft.IsNotAuto)
+                if (parentMarginLeft != null && parentMarginLeft.IsNotAuto)
                     relativeFromColumn += (long)(Emu)parentMarginLeft;
                 marginRightInEmus = Math.Max(marginRightInEmus, minDistFromEdge);
             }
@@ -2488,14 +2488,14 @@ namespace OpenXmlPowerTools.HtmlToWml
                 if (marginRightProp.IsNotAuto)
                     relativeFromColumn -= (long)(Emu)marginRightInEmus;
                 CssExpression parentMarginRight = element.Parent.GetProp("margin-right");
-                if (parentMarginRight.IsNotAuto)
+                if (parentMarginRight != null && parentMarginRight.IsNotAuto)
                     relativeFromColumn -= (long)(Emu)parentMarginRight;
                 marginLeftInEmus = Math.Max(marginLeftInEmus, minDistFromEdge);
             }
 
             Emu relativeFromParagraph = marginTopInEmus;
             CssExpression parentMarginTop = element.Parent.GetProp("margin-top");
-            if (parentMarginTop.IsNotAuto)
+            if (parentMarginTop != null && parentMarginTop.IsNotAuto)
                 relativeFromParagraph += (long)(Emu)parentMarginTop;
 
             XElement anchor = new XElement(WP.anchor,
@@ -2634,25 +2634,28 @@ namespace OpenXmlPowerTools.HtmlToWml
 
             CssExpression width = img.GetProp("width");
             CssExpression height = img.GetProp("height");
-            if (width.IsNotAuto && height.IsAuto)
+            if (width != null && height != null)
             {
-                Emu widthInEmus = (Emu)width;
-                double percentChange = (float)widthInEmus / (float)cx;
-                cx = widthInEmus;
-                cy = (long)(cy * percentChange);
-                return new SizeEmu(cx, cy);
-            }
-            if (width.IsAuto && height.IsNotAuto)
-            {
-                Emu heightInEmus = (Emu)height;
-                double percentChange = (float)heightInEmus / (float)cy;
-                cy = heightInEmus;
-                cx = (long)(cx * percentChange);
-                return new SizeEmu(cx, cy);
-            }
-            if (width.IsNotAuto && height.IsNotAuto)
-            {
-                return new SizeEmu((Emu)width, (Emu)height);
+                if (width.IsNotAuto && height.IsAuto)
+                {
+                    Emu widthInEmus = (Emu)width;
+                    double percentChange = (float)widthInEmus / (float)cx;
+                    cx = widthInEmus;
+                    cy = (long)(cy * percentChange);
+                    return new SizeEmu(cx, cy);
+                }
+                if (width.IsAuto && height.IsNotAuto)
+                {
+                    Emu heightInEmus = (Emu)height;
+                    double percentChange = (float)heightInEmus / (float)cy;
+                    cy = heightInEmus;
+                    cx = (long)(cx * percentChange);
+                    return new SizeEmu(cx, cy);
+                }
+                if (width.IsNotAuto && height.IsNotAuto)
+                {
+                    return new SizeEmu((Emu)width, (Emu)height);
+                }
             }
             return new SizeEmu(cx, cy);
         }
@@ -2903,9 +2906,9 @@ namespace OpenXmlPowerTools.HtmlToWml
             // todo should check based on display property
             bool numItem = paragraph.Name == XhtmlNoNamespace.li;
 
-            if (numItem && marginTopProperty.IsAuto)
+            if (numItem && marginTopProperty != null && marginTopProperty.IsAuto)
                 beforeAutospacing = "1";
-            if (numItem && marginBottomProperty.IsAuto)
+            if (numItem && marginBottomProperty != null && marginBottomProperty.IsAuto)
                 afterAutospacing = "1";
             if (marginTopProperty != null && marginTopProperty.IsNotAuto)
             {
@@ -2976,15 +2979,14 @@ namespace OpenXmlPowerTools.HtmlToWml
             CssExpression letterSpacingProperty = element.GetProp("letter-spacing");
             CssExpression directionProp = element.GetProp("direction");
 
-            string colorPropertyString = colorProperty.ToString();
+            string colorPropertyString = colorProperty?.ToString();
             string fontFamilyString = GetUsedFontFromFontFamilyProperty(fontFamilyProperty);
             TPoint? fontSizeTPoint = GetUsedSizeFromFontSizeProperty(fontSizeProperty);
-            string textDecorationString = textDecorationProperty.ToString();
-            string fontStyleString = fontStyleProperty.ToString();
-            string fontWeightString = fontWeightProperty.ToString().ToLower();
-            string backgroundColorString = backgroundColorProperty.ToString().ToLower();
-            string letterSpacingString = letterSpacingProperty.ToString().ToLower();
-            string directionString = directionProp.ToString().ToLower();
+            string textDecorationString = textDecorationProperty?.ToString();
+            string fontStyleString = fontStyleProperty?.ToString();
+            string fontWeightString = fontWeightProperty?.ToString().ToLower();
+            string backgroundColorString = backgroundColorProperty?.ToString().ToLower();
+            string directionString = directionProp?.ToString().ToLower();
 
             bool subAncestor = element.AncestorsAndSelf(XhtmlNoNamespace.sub).Any();
             bool supAncestor = element.AncestorsAndSelf(XhtmlNoNamespace.sup).Any();
@@ -3001,7 +3003,7 @@ namespace OpenXmlPowerTools.HtmlToWml
                 dirAttributeString = dirAttribute.Value.ToLower();
 
             XElement shd = null;
-            if (backgroundColorString != "transparent")
+            if (!string.IsNullOrEmpty(backgroundColorString) && backgroundColorString != "transparent")
                 shd = new XElement(W.shd, new XAttribute(W.val, "clear"),
                     new XAttribute(W.color, "auto"),
                     new XAttribute(W.fill, backgroundColorString));
@@ -3101,7 +3103,7 @@ namespace OpenXmlPowerTools.HtmlToWml
         // def and ghi.
         private static string GetDisplayText(XText node, bool preserveWhiteSpace)
         {
-            string textTransform = node.Parent.GetProp("text-transform").ToString();
+            string textTransform = node.Parent.GetProp("text-transform")?.ToString();
             bool isFirst = node.Parent.Name == XhtmlNoNamespace.p && node == node.Parent.FirstNode;
             bool isLast = node.Parent.Name == XhtmlNoNamespace.p && node == node.Parent.LastNode;
 
@@ -3258,7 +3260,7 @@ namespace OpenXmlPowerTools.HtmlToWml
         private static XElement GetTableWidth(XElement element)
         {
             CssExpression width = element.GetProp("width");
-            if (width.IsAuto)
+            if (width == null || width.IsAuto)
             {
                 return new XElement(W.tblW,
                     new XAttribute(W._w, "0"),
@@ -3273,7 +3275,7 @@ namespace OpenXmlPowerTools.HtmlToWml
         private static XElement GetCellWidth(XElement element)
         {
             CssExpression width = element.GetProp("width");
-            if (width.IsAuto)
+            if (width == null || width.IsAuto)
             {
                 return new XElement(W.tcW,
                     new XAttribute(W._w, "0"),
@@ -3320,7 +3322,6 @@ namespace OpenXmlPowerTools.HtmlToWml
             CssExpression styleProp = element.GetProp(string.Format("border-{0}-style", whichBorder));
             CssExpression colorProp = element.GetProp(string.Format("border-{0}-color", whichBorder));
             CssExpression paddingProp = element.GetProp(string.Format("padding-{0}", whichBorder));
-            CssExpression marginProp = element.GetProp(string.Format("margin-{0}", whichBorder));
 
             // The space attribute is equivalent to the margin properties of CSS
             // the ind element of the parent is more or less equivalent to the padding properties of CSS, except that ind takes space
@@ -3448,7 +3449,7 @@ namespace OpenXmlPowerTools.HtmlToWml
                         XElement cell = tableArray[r][c];
                         CssExpression width = cell.GetProp("width");
                         XAttribute colSpan = cell.Attribute(XhtmlNoNamespace.colspan);
-                        if (colSpan == null && columnWidth.ToString() == "auto" && width.ToString() != "auto")
+                        if (colSpan == null && columnWidth.ToString() == "auto" && (width == null || width.ToString() != "auto"))
                         {
                             columnWidth = width;
                             break;
@@ -3619,7 +3620,7 @@ namespace OpenXmlPowerTools.HtmlToWml
         private static XElement GetCellShading(XElement element)
         {
             CssExpression backgroundColorProp = element.GetProp("background-color");
-            if (backgroundColorProp != null && (string)backgroundColorProp != "transparent")
+            if (backgroundColorProp != null && backgroundColorProp != "transparent")
             {
                 XElement shd = new XElement(W.shd,
                     new XAttribute(W.val, "clear"),
@@ -3688,7 +3689,7 @@ namespace OpenXmlPowerTools.HtmlToWml
             if (table != null)
             {
                 CssExpression borderCollapse = table.GetProp("border-collapse");
-                if (borderCollapse == null || (string)borderCollapse != "collapse")
+                if (borderCollapse == null || borderCollapse != "collapse")
                 {
                     // todo very incomplete
                     CssExpression borderSpacing = table.GetProp("border-spacing");
@@ -4229,7 +4230,7 @@ namespace OpenXmlPowerTools.HtmlToWml
             CssExpression color = element.GetProp("background-color");
 
             // todo this really should test against default background color
-            if (color.ToString() != "transparent")
+            if (color?.ToString() != "transparent")
             {
                 string hexString = color.ToString();
                 XElement shd = new XElement(W.shd,
@@ -5383,7 +5384,7 @@ namespace OpenXmlPowerTools.HtmlToWml
         {
             XDocument themeXDoc = wDoc.MainDocumentPart.ThemePart.GetXDocument();
 
-            CssExpression minorFont = html.Descendants(XhtmlNoNamespace.body).FirstOrDefault().GetProp("font-family");
+            CssExpression minorFont = html.Descendants(XhtmlNoNamespace.body).FirstOrDefault()?.GetProp("font-family");
             XElement majorFontElement = html.Descendants().Where(e =>
                 e.Name == XhtmlNoNamespace.h1 ||
                 e.Name == XhtmlNoNamespace.h2 ||

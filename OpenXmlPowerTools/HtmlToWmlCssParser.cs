@@ -581,23 +581,28 @@ namespace OpenXmlPowerTools.HtmlToWml.CSS
 
         public static implicit operator string(CssExpression e)
         {
-            return e.ToString();
+            return e?.ToString();
         }
 
         public static explicit operator double(CssExpression e)
         {
+            if (e == null)
+            {
+                return 0;
+            }
+
             return double.Parse(e.Terms.First().Value, CultureInfo.InvariantCulture);
         }
 
         public static explicit operator Emu(CssExpression e)
         {
-            return Emu.PointsToEmus(double.Parse(e.Terms.First().Value, CultureInfo.InvariantCulture));
+            return Emu.PointsToEmus((double)e);
         }
 
         // will only be called on expression that is in terms of points
         public static explicit operator TPoint(CssExpression e)
         {
-            return new TPoint(double.Parse(e.Terms.First().Value, CultureInfo.InvariantCulture));
+            return new TPoint((double)e);
         }
 
         // will only be called on expression that is in terms of points
